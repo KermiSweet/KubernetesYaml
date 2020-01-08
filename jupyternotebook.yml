@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jupyter-app
+spec:
+  selector:
+    matchLabels:
+      app: jupyter
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: jupyter
+    spec:
+      containers:
+      - name: jupyter
+        image: 1783247180/rong-jn
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8888
+        env:
+        - name: JUPYTER_GATEWAY_URL
+          value: 'http://192.168.73.129:30050'
+        # - name: JUPYTER_GATEWAY_HTTP_USER
+          # value: guest
+        # - name: JUPYTER_GATEWAY_HTTP_PWD
+          # value: guest
+        - name: JUPYTER_GATEWAY_VALIDATE_CERT
+          value: 'false'
+        - name: LOG_LEVEL
+          value: DEBUG  
+        securityContext:
+          privileged: true
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jupyter-http
+spec:
+  ports:
+    - port: 8888
+      targetPort: 8888
+      name: jupyter-notebook
+      nodePort: 30010
+  type: LoadBalancer
+  selector:
+    app: jupyter

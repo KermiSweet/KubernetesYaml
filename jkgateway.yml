@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jupyter-app
+spec:
+  selector:
+    matchLabels:
+      app: jupyter
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        # 容器标签的名字，发布 Service 时，selector 需要和这里对应
+        app: jupyter
+    spec:
+      containers:
+      - name: jupyter
+        image: 1783247180/rong-jkgateway
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jupyter-http
+spec:
+  ports:
+    - port: 8888
+      targetPort: 8888
+      name: jupyter-notebook
+      nodePort: 30100
+    - port: 8889
+      targetPort: 8889
+      name: jupyter-kernel-gateway
+      nodePort: 30110
+  type: LoadBalancer
+  selector:
+    app: jupyter
